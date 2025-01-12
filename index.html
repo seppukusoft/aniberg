@@ -32,7 +32,6 @@
 <body>
     <h1>Aniberg</h1>
 
-    <!-- Input for username -->
     <input type="text" id="usernameInput" placeholder="Enter username" />
     <button id="fetchButton">Fetch Anime</button>
 
@@ -79,7 +78,6 @@
                     return;
                 }
 
-                // Extract completed anime and popularity
                 const completedAnime = data.data.MediaListCollection.lists.flatMap(
                     (list) => list.entries.map((entry) => ({
                         titleRomaji: entry.media.title.romaji || entry.media.title.english,
@@ -130,7 +128,6 @@
             return tiers;
         }
 
-        // Function to draw the iceberg image with the tiered anime names on the canvas
         function drawIceberg(icebergTiers, username) {
             const canvas = document.getElementById('icebergCanvas');
             const ctx = canvas.getContext('2d');
@@ -155,11 +152,10 @@
 
                 ctx.drawImage(icebergImage, 0, 0, imgWidth, imgHeight);
 
-                // Draw the username title
                 ctx.font = 'bold 24px Verdana';
-                ctx.fillStyle = 'red'; // Set text color to white
+                ctx.fillStyle = 'red';
                 ctx.textAlign = 'center';
-                ctx.fillText(`${username}'s Aniberg`, imgWidth / 2, 40); // Position it near the top center
+                ctx.fillText(`${username}'s Aniberg`, imgWidth / 2, 40);
 
                 ctx.font = 'bold 18px Verdana';
                 ctx.fillStyle = 'red';
@@ -223,7 +219,6 @@
             return randomAnime;
         }
 
-        // Event listener for button click
         document.getElementById('fetchButton').addEventListener('click', async () => {
             const username = document.getElementById('usernameInput').value.trim();
             if (username) {
