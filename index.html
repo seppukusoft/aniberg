@@ -5,233 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aniberg</title>
     <style>
-        canvas {
+        #canvas, #downloadBtn {
             border: 1px solid black;
-            display: block;
-            margin: 20px auto;
+            display: none;
         }
-        title, h1 {
-            text-align: center;
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        input, button {
+            margin: 10px;
+        }
+        h1 {
             font-family: Verdana, Geneva, Tahoma, sans-serif;
-        }
-        #usernameInput {
-            display: block;
-            margin: 20px auto;
-            font-size: 18px;
-            padding: 10px;
-        }
-        #fetchButton {
-            display: block;
-            margin: 10px auto;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
         }
     </style>
 </head>
 <body>
+    <br><br>
     <h1>Aniberg</h1>
-
     <input type="text" id="usernameInput" placeholder="Enter username" />
-    <button id="fetchButton">Fetch Anime</button>
-
-    <canvas id="icebergCanvas"></canvas>
-
-    <script>
-        // Function to fetch user's completed anime list
-        async function fetchCompletedAnime(user) {
-            const query = `
-              query ($username: String) {
-                MediaListCollection(userName: $username, type: ANIME, status: COMPLETED) {
-                  lists {
-                    entries {
-                      media {
-                        title {
-                          romaji
-                          english
-                        }
-                        id
-                        popularity
-                      }
-                    }
-                  }
-                }
-              }
-            `;
-          
-            const variables = { username: user };
-
-            try {
-                const response = await fetch('https://graphql.anilist.co', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Accept: 'application/json',
-                    },
-                    body: JSON.stringify({ query, variables }),
-                });
-
-                const data = await response.json();
-                if (data.errors) {
-                    console.error('Error fetching data:', data.errors);
-                    alert('User not found. Please enter a valid username.');
-                    return;
-                }
-
-                const completedAnime = data.data.MediaListCollection.lists.flatMap(
-                    (list) => list.entries.map((entry) => ({
-                        titleRomaji: entry.media.title.romaji || entry.media.title.english,
-                        titleEnglish: entry.media.title.english || entry.media.title.romaji,
-                        id: entry.media.id,
-                        popularity: entry.media.popularity,
-                    }))
-                );
-
-                console.log('Completed Anime:', completedAnime);
-                return completedAnime;
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-
-        // Assign iceberg tiers based on popularity directly from the completedAnime list
-        function assignIcebergTiers(userAnime) {
-            const tiers = {
-                "Tier 1 (Sky)": [],
-                "Tier 2 (High)": [],
-                "Tier 3 (Surface)": [],
-                "Tier 4 (Shallow)": [],
-                "Tier 5 (Mid)": [],
-                "Tier 6 (Deep)": [],
-                "Tier 7 (Abyss)": []
-            };
-
-            userAnime.forEach((anime) => {
-                const { popularity } = anime;
-
-                if (popularity > 450_000) {
-                    tiers["Tier 1 (Sky)"].push(anime);
-                } else if (popularity > 100_000) {
-                    tiers["Tier 2 (High)"].push(anime);
-                } else if (popularity > 60_000) {
-                    tiers["Tier 3 (Surface)"].push(anime);
-                } else if (popularity > 30_000) {
-                    tiers["Tier 4 (Shallow)"].push(anime);
-                }  else if (popularity > 15_000) {
-                    tiers["Tier 5 (Mid)"].push(anime);
-                } else if (popularity > 3_000) {
-                    tiers["Tier 6 (Deep)"].push(anime);
-                } else {
-                    tiers["Tier 7 (Abyss)"].push(anime);
-                }
-            });
-            return tiers;
-        }
-
-        function drawIceberg(icebergTiers, username) {
-            const canvas = document.getElementById('icebergCanvas');
-            const ctx = canvas.getContext('2d');
-
-            const icebergImage = new Image();
-            icebergImage.src = 'https://pbs.twimg.com/media/FWKrBD0XwAELJ_s?format=jpg&name=4096x4096'; 
-
-            icebergImage.onload = () => {
-                const imageAspectRatio = icebergImage.width / icebergImage.height;
-                const canvasAspectRatio = window.innerWidth / window.innerHeight;
-
-                let imgWidth = window.innerWidth;
-                let imgHeight = window.innerWidth / imageAspectRatio;
-
-                if (imgHeight > window.innerHeight) {
-                    imgHeight = window.innerHeight;
-                    imgWidth = window.innerHeight * imageAspectRatio;
-                }
-
-                canvas.width = imgWidth;
-                canvas.height = imgHeight;
-
-                ctx.drawImage(icebergImage, 0, 0, imgWidth, imgHeight);
-
-                ctx.font = 'bold 24px Verdana';
-                ctx.fillStyle = 'red';
-                ctx.textAlign = 'center';
-                ctx.fillText(`${username}'s Aniberg`, imgWidth / 2, 40);
-
-                ctx.font = 'bold 18px Verdana';
-                ctx.fillStyle = 'red';
-                ctx.textAlign = 'center';
-
-                const tierPositions = {
-                    "Tier 1 (Sky)": 200,
-                    "Tier 2 (High)": 350,
-                    "Tier 3 (Surface)": 500,
-                    "Tier 4 (Shallow)": 650,
-                    "Tier 5 (Mid)": 800,
-                    "Tier 6 (Deep)": 950,
-                    "Tier 7 (Abyss)": 1100
-                };
-
-                Object.keys(icebergTiers).forEach(tier => {
-                    const animeList = icebergTiers[tier];
-                    const yOffset = tierPositions[tier] || 400;
-
-                    const randomAnime = getRandomAnime(animeList, 6);
-
-                    const horizontalSpacing = imgWidth / 2; 
-                    const verticalSpacing = 30;  
-
-                    const thirdPoint = Math.ceil(randomAnime.length / 3);
-                    const firstLine = randomAnime.slice(0, thirdPoint);
-                    const secondLine = randomAnime.slice(thirdPoint, 2 * thirdPoint);
-                    const thirdLine = randomAnime.slice(2 * thirdPoint);
-
-                    firstLine.forEach((anime, index) => {
-                        const xOffset = (index % 3) * horizontalSpacing;
-                        const yOffsetAdjusted = yOffset + Math.floor(index / 7) * verticalSpacing;
-                        ctx.fillText(anime.titleEnglish, xOffset + 175, yOffsetAdjusted);
-                    });
-
-                    secondLine.forEach((anime, index) => {
-                        const xOffset = (index % 3) * horizontalSpacing;
-                        const yOffsetAdjusted = yOffset + verticalSpacing + Math.floor(index / 7) * verticalSpacing;
-                        ctx.fillText(anime.titleEnglish, xOffset + 175, yOffsetAdjusted);
-                    });
-
-                    thirdLine.forEach((anime, index) => {
-                        const xOffset = (index % 3) * horizontalSpacing;
-                        const yOffsetAdjusted = yOffset + verticalSpacing * 2 + Math.floor(index / 7) * verticalSpacing;
-                        ctx.fillText(anime.titleEnglish, xOffset + 175, yOffsetAdjusted);
-                    });
-                });
-            };
-        }
-
-        function getRandomAnime(animeList, count) {
-            const randomAnime = [];
-            const filteredAnimeList = animeList.filter(anime => anime.titleEnglish.length <= 30); 
-
-            const shuffled = filteredAnimeList.sort(() => 0.5 - Math.random()); 
-
-            for (let i = 0; i < count; i++) {
-                if (shuffled[i]) randomAnime.push(shuffled[i]);
-            }
-
-            return randomAnime;
-        }
-
-        document.getElementById('fetchButton').addEventListener('click', async () => {
-            const username = document.getElementById('usernameInput').value.trim();
-            if (username) {
-                const userAnime = await fetchCompletedAnime(username);
-                if (userAnime) {
-                    const icebergTiers = assignIcebergTiers(userAnime);
-                    console.log('Iceberg Tiers:', icebergTiers);
-                    drawIceberg(icebergTiers, username); 
-                }
-            } else {
-                alert("Please enter a valid username.");
-            }
-        });
-    </script>
+    <button id="fetchButton" onclick="main()">Fetch Anime</button>
+    <canvas id="canvas" width="800" height="1200"></canvas>
+    <button id="downloadBtn">Download Image</button>
+    <script src="new.js"></script>
 </body>
 </html>
