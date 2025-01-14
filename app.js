@@ -6,6 +6,7 @@ async function fetchAnime() {
                     status
                     entries {
                       media {
+                      format
                         title {
                           romaji
                           english
@@ -60,11 +61,12 @@ async function fetchAnime() {
                     startDate: entry.media.startDate.year,
                     averageScore: entry.media.averageScore,
                     isAdult: entry.media.isAdult,
-                    status: list.status
+                    status: list.status,
+                    format: entry.media.format
                 };
             }).filter((anime) => 
-              !anime.titleEnglish.toLowerCase().includes('season') && 
-              !anime.isAdult && (anime.status === 'COMPLETED' || anime.status === 'CURRENT')
+              !anime.titleEnglish.toLowerCase().includes('season') && !anime.titleEnglish.toLowerCase().includes('cour') && anime.format !== 'MUSIC' &&
+              !anime.isAdult && (anime.status === 'COMPLETED' || anime.status === 'CURRENT' || anime.status === 'PAUSED' || anime.status === 'DROPPED')
           )
         );
 
@@ -91,17 +93,17 @@ function getTiers(list) {
 
   list.forEach((anime) => {
     const popularity = calculateObscurity(anime);
-    if (popularity < 1200) {
+    if (popularity < 800) {
         tiers["Tier 1 (Sky)"].push(anime);
-    } else if (popularity < 1500) {
+    } else if (popularity < 1200) {
         tiers["Tier 2 (High)"].push(anime);
-    } else if (popularity < 1800) {
+    } else if (popularity < 1500) {
         tiers["Tier 3 (Surface)"].push(anime);
-    } else if (popularity < 2100) {
+    } else if (popularity < 2000) {
         tiers["Tier 4 (Shallow)"].push(anime);
-    }  else if (popularity < 2400) {
+    }  else if (popularity < 2200) {
         tiers["Tier 5 (Mid)"].push(anime);
-    } else if (popularity < 2700) {
+    } else if (popularity < 2600) {
         tiers["Tier 6 (Deep)"].push(anime);
     } else if (popularity < 3000) {
         tiers["Tier 7 (Dark)"].push(anime);
@@ -114,16 +116,16 @@ function getTiers(list) {
 }
 
 function calculateObscurity(anime, maxPopularity = 800000) {
-  const WEIGHT_POPULARITY = 0.75;
-  const WEIGHT_SCORE = 0.25; 
-  const CURRENT_YEAR = new Date().getFullYear();
+  const weightPopularity = 0.70;
+  const weightRating = 0.30; 
+  const currentYear = new Date().getFullYear();
   const normalizedPopularity = (maxPopularity - anime.popularity) / maxPopularity;
   const normalizedScore = (10 - (anime.averageScore / 10));
   const releaseYear = anime.startDate;
-  const ageBonus = Math.max(0, (CURRENT_YEAR - releaseYear) * 0.005); 
+  const ageBonus = Math.max(0, (currentYear - releaseYear) * 0.007); 
   const obscurityScore = (
-      normalizedPopularity * WEIGHT_POPULARITY +
-      normalizedScore * WEIGHT_SCORE +
+      normalizedPopularity * weightPopularity +
+      normalizedScore * weightRating +
       ageBonus
   ) * 1000;
   console.log(anime.titleEnglish, obscurityScore);
@@ -141,18 +143,16 @@ function drawIceberg(username, tiers, language) {
   icebergImage.onload = () => {
       ctx.drawImage(icebergImage, 0, 0, canvas.width, canvas.height);
 
-      ctx.font = '30px Verdana';
-      ctx.fillStyle = 'red';
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = 3;
+      ctx.font = '30px Comic Sans MS';
+      ctx.fillStyle = 'black';
+      ctx.lineWidth = 1.5;
       ctx.textAlign = 'center';
       ctx.strokeText(`${username}'s Aniberg`, canvas.width / 2, 50);
       ctx.fillText(`${username}'s Aniberg`, canvas.width / 2, 50);
 
-      ctx.font = '13px Verdana';
-      ctx.fillStyle = 'red';
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = 2;
+      ctx.font = '13px Comic Sans MS';
+      ctx.fillStyle = 'black';
+      ctx.lineWidth = 0.1;
       ctx.textAlign = 'right';
       ctx.strokeText('https://seppukusoft.github.io/aniberg/', canvas.width - 10, 80);
       ctx.fillText('https://seppukusoft.github.io/aniberg/', canvas.width - 10, 80);
@@ -168,10 +168,9 @@ function drawIceberg(username, tiers, language) {
           "Tier 8 (Abyss)": { x: 0, y: 1050, width: 1000, height: 100 }
       };
 
-      ctx.font = '19px Verdana';
-      ctx.fillStyle = 'red';
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = 2;
+      ctx.font = '19px Comic Sans MS';
+      ctx.fillStyle = 'black';
+      ctx.lineWidth = 0.5;
       for (const [tier, position] of Object.entries(tierPositions)) {
         const selectedAnime = getRandomSubset(tiers[tier], 5);
         selectedAnime.forEach((anime, index) => {
@@ -215,10 +214,21 @@ function getRandomSubset(array, size) {
 document.getElementById('downloadBtn').addEventListener('click', () => {
   const canvas = document.getElementById('canvas');
   const link = document.createElement('a');
-  link.download = 'iceberg-tiers.png';
-  link.href = canvas.toDataURL();
-  link.click();
+
+  // Ensure the canvas exists and has content
+  if (canvas && canvas.toDataURL) {
+    link.href = canvas.toDataURL('image/png'); // Specify PNG format
+    link.download = 'iceberg.png'; // File name for the download
+
+    // Append the link to the document to ensure proper click behavior
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link); // Clean up the link after clicking
+  } else {
+    console.error('Canvas element is missing or not properly initialized.');
+  }
 });
+
 
 document.getElementById('usernameInput').addEventListener("keypress", function(event) {
     if (event.key === "Enter") {
