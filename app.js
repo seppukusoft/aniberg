@@ -149,6 +149,14 @@ function drawIceberg(username, tiers, language) {
       ctx.strokeText(`${username}'s Aniberg`, canvas.width / 2, 50);
       ctx.fillText(`${username}'s Aniberg`, canvas.width / 2, 50);
 
+      ctx.font = '13px Verdana';
+      ctx.fillStyle = 'red';
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 2;
+      ctx.textAlign = 'right';
+      ctx.strokeText('https://seppukusoft.github.io/aniberg/', canvas.width - 10, 80);
+      ctx.fillText('https://seppukusoft.github.io/aniberg/', canvas.width - 10, 80);
+
       const tierPositions = {
           "Tier 1 (Sky)": { x: 0, y: 90, width: 1000, height: 100 },
           "Tier 2 (High)": { x: 0, y: 240, width: 1000, height: 100 },
@@ -164,7 +172,6 @@ function drawIceberg(username, tiers, language) {
       ctx.fillStyle = 'red';
       ctx.strokeStyle = 'black';
       ctx.lineWidth = 2;
-
       for (const [tier, position] of Object.entries(tierPositions)) {
         const selectedAnime = getRandomSubset(tiers[tier], 5);
         selectedAnime.forEach((anime, index) => {
