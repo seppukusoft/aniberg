@@ -215,16 +215,10 @@ function getRandomSubset(array, size) {
 document.getElementById('downloadBtn').addEventListener('click', () => {
   const canvas = document.getElementById('canvas');
   const link = document.createElement('a');
-
-  // Ensure the canvas exists and has content
   if (canvas && canvas.toDataURL) {
-    link.href = canvas.toDataURL('image/png'); // Specify PNG format
-    link.download = 'iceberg.png'; // File name for the download
-
-    // Append the link to the document to ensure proper click behavior
-    document.body.appendChild(link);
+    link.href = canvas.toDataURL('image/png'); 
+    link.download = 'iceberg.png';
     link.click();
-    document.body.removeChild(link); // Clean up the link after clicking
   } else {
     console.error('Canvas element is missing or not properly initialized.');
   }
