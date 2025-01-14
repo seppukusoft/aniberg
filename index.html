@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<html data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,32 +9,58 @@
         #canvas, #downloadBtn {
             border: 1px solid black;
             display: none;
-            display: none;
+            margin-top: 50px;
         }
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
             margin: 0;
+            padding: 50px 0;
         }
         input, button {
             margin: 10px;
+            max-width: 350px;
         }
         h1 {
             font-family: Verdana, Geneva, Tahoma, sans-serif;
         }
+        fieldset {
+            margin: 10px;
+            display: flex;
+            flex-direction: row;
+            max-width: 350px;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
+    <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.violet.min.css"
+    >
 </head>
 <body>
     <br><br>
     <br><br>
     <h1>Aniberg</h1>
-    <input type="text" id="usernameInput" placeholder="Enter username" />
+    <input type="search" id="usernameInput" placeholder="Enter username" />
+    <br>
+    <fieldset>
+        <legend>Choose name type:</legend>
+        <input type="radio" id="English" name="language" value="English" checked />
+        <label htmlFor="English">English</label>
+        <input type="radio" id="Romaji" name="language" value="Romaji" />
+        <label htmlFor="Romaji">Romaji</label>
+      </fieldset>
+    <br>
     <button id="fetchButton" onclick="main()">Fetch Anime</button>
+    <br>
     <canvas id="canvas" width="800" height="1200"></canvas>
+    <br>
     <button id="downloadBtn">Download Image</button>
+    <br><br>
+    <br><br>
     <script src="app.js"></script>
 </body>
 </html>

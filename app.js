@@ -69,7 +69,7 @@ async function fetchAnime() {
         );
 
         console.log('Completed Anime:', compWatchAnime);
-        return compWatchAnime;
+        return { username: user, animeList: compWatchAnime };
     } catch (error) {
         console.error('Error fetching data:', error);
         alert('An error occurred while fetching data. Please try again later.');
@@ -85,25 +85,28 @@ function getTiers(list) {
       "Tier 4 (Shallow)": [],
       "Tier 5 (Mid)": [],
       "Tier 6 (Deep)": [],
-      "Tier 7 (Abyss)": []
+      "Tier 7 (Dark)": [],
+      "Tier 8 (Abyss)": []
   };
 
   list.forEach((anime) => {
     const popularity = calculateObscurity(anime);
-    if (popularity < 1000) {
+    if (popularity < 1200) {
         tiers["Tier 1 (Sky)"].push(anime);
-    } else if (popularity < 1300) {
+    } else if (popularity < 1500) {
         tiers["Tier 2 (High)"].push(anime);
-    } else if (popularity < 1600) {
+    } else if (popularity < 1800) {
         tiers["Tier 3 (Surface)"].push(anime);
-    } else if (popularity < 1900) {
+    } else if (popularity < 2100) {
         tiers["Tier 4 (Shallow)"].push(anime);
-    }  else if (popularity < 2200) {
+    }  else if (popularity < 2400) {
         tiers["Tier 5 (Mid)"].push(anime);
-    } else if (popularity < 2500) {
+    } else if (popularity < 2700) {
         tiers["Tier 6 (Deep)"].push(anime);
+    } else if (popularity < 3000) {
+        tiers["Tier 7 (Dark)"].push(anime);
     } else {
-        tiers["Tier 7 (Abyss)"].push(anime);
+        tiers["Tier 8 (Abyss)"].push(anime);
     }
   });
 
@@ -114,27 +117,20 @@ function calculateObscurity(anime, maxPopularity = 800000) {
   const WEIGHT_POPULARITY = 0.75;
   const WEIGHT_SCORE = 0.25; 
   const CURRENT_YEAR = new Date().getFullYear();
-
-  // Normalize popularity (lower is better for obscurity)
   const normalizedPopularity = (maxPopularity - anime.popularity) / maxPopularity;
-
-  // Normalize score (lower is better for obscurity)
   const normalizedScore = (10 - (anime.averageScore / 10));
-
-  // Age bonus (older anime are more obscure)
   const releaseYear = anime.startDate;
-  const ageBonus = Math.max(0, (CURRENT_YEAR - releaseYear) * 0.005); // 0.02 points per year
-
-  // Calculate final obscurity score
+  const ageBonus = Math.max(0, (CURRENT_YEAR - releaseYear) * 0.005); 
   const obscurityScore = (
       normalizedPopularity * WEIGHT_POPULARITY +
       normalizedScore * WEIGHT_SCORE +
       ageBonus
   ) * 1000;
+  console.log(anime.titleEnglish, obscurityScore);
   return obscurityScore;
 }
 
-function drawIceberg(tiers) {
+function drawIceberg(username, tiers, language) {
   document.getElementById('downloadBtn').style.display = 'block';
   document.getElementById('canvas').style.display = 'block';  
   const canvas = document.getElementById('canvas');
@@ -150,20 +146,21 @@ function drawIceberg(tiers) {
       ctx.strokeStyle = 'black';
       ctx.lineWidth = 3;
       ctx.textAlign = 'center';
-      ctx.strokeText('Aniberg', canvas.width / 2, 50);
-      ctx.fillText('Aniberg', canvas.width / 2, 50);
+      ctx.strokeText(`${username}'s Aniberg`, canvas.width / 2, 50);
+      ctx.fillText(`${username}'s Aniberg`, canvas.width / 2, 50);
 
       const tierPositions = {
           "Tier 1 (Sky)": { x: 0, y: 90, width: 1000, height: 100 },
           "Tier 2 (High)": { x: 0, y: 240, width: 1000, height: 100 },
           "Tier 3 (Surface)": { x: 0, y: 380, width: 1000, height: 100 },
           "Tier 4 (Shallow)": { x: 0, y: 520, width: 1000, height: 100 },
-          "Tier 5 (Mid)": { x: 0, y: 635, width: 1000, height: 100 },
-          "Tier 6 (Deep)": { x: 0, y: 765, width: 1000, height: 100 },
-          "Tier 7 (Abyss)": { x: 0, y: 895, width: 1000, height: 100 }
+          "Tier 5 (Mid)": { x: 0, y: 660, width: 1000, height: 100 },
+          "Tier 6 (Deep)": { x: 0, y: 792, width: 1000, height: 100 },
+          "Tier 7 (Dark)": { x: 0, y: 920, width: 1000, height: 100 },
+          "Tier 8 (Abyss)": { x: 0, y: 1050, width: 1000, height: 100 }
       };
 
-      ctx.font = '20px Verdana';
+      ctx.font = '19px Verdana';
       ctx.fillStyle = 'red';
       ctx.strokeStyle = 'black';
       ctx.lineWidth = 2;
@@ -185,7 +182,7 @@ function drawIceberg(tiers) {
                 textY = position.y + 60 + 3 * 25;
                 ctx.textAlign = 'center';
             }
-            const text = `${anime.titleEnglish || anime.titleRomaji}`;
+            const text = language === 'English' ? anime.titleEnglish : anime.titleRomaji;
             ctx.strokeText(text, textX, textY);
             ctx.fillText(text, textX, textY);
         });
@@ -194,18 +191,18 @@ function drawIceberg(tiers) {
 }
 
 function getRandomSubset(array, size) {
-  const filteredArray = array.filter(anime => (anime.titleRomaji || anime.titleEnglish).length <= 50);
-  const shuffled = filteredArray.slice(0);
-  let i = filteredArray.length;
-  const min = i - size;
-  let temp, index;
-  while (i-- > min) {
-      index = Math.floor((i + 1) * Math.random());
-      temp = shuffled[index];
-      shuffled[index] = shuffled[i];
-      shuffled[i] = temp;
-  }
-  return shuffled.slice(min);
+    const filteredArray = array.filter(anime => (anime.titleRomaji || anime.titleEnglish).length <= 40);
+    const shuffled = filteredArray.slice(0);
+    let i = filteredArray.length;
+    const min = Math.max(i - size, 0);
+    let temp, index;
+    while (i-- > min) {
+        index = Math.floor((i + 1) * Math.random());
+        temp = shuffled[index];
+        shuffled[index] = shuffled[i];
+        shuffled[i] = temp;
+    }
+    return shuffled.slice(min);
 }
 
 document.getElementById('downloadBtn').addEventListener('click', () => {
@@ -216,9 +213,17 @@ document.getElementById('downloadBtn').addEventListener('click', () => {
   link.click();
 });
 
+document.getElementById('usernameInput').addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+      document.getElementById("fetchButton").click();
+    }
+}); 
+
 async function main() {
-    let list = await fetchAnime();
-    let tiers = getTiers(list);
+    const { username, animeList } = await fetchAnime();
+    let tiers = getTiers(animeList);
     console.log(tiers);
-    drawIceberg(tiers);
+    const language = document.querySelector('input[name="language"]:checked').value;
+    console.log(`Selected language: ${language}`);
+    drawIceberg(username, tiers, language);
 }
