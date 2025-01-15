@@ -157,7 +157,7 @@ function drawIceberg(username, tiers, language) {
     const logoImage = new Image();
     logoImage.src = 'bit.ly_aniberg.png'; 
     logoImage.onload = () => {
-      ctx.drawImage(logoImage, canvas.width - 120, 10, 90, 90); // Adjust the position and size as needed
+      ctx.drawImage(logoImage, canvas.width - 120, 10, 90, 90); 
     };
 
     ctx.font = '13px Comic Sans MS';
