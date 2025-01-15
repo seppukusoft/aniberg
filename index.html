@@ -11,6 +11,20 @@
             display: none;
             margin-top: 50px;
         }
+        #downloadBtn {
+            margin-bottom: 35px;
+        }
+        #stats, #statHeader {
+            display: none;
+            justify-content: center;
+        }
+        #statDiv {
+            display: none;
+            border: 1px solid black;
+            padding-right: 20px;
+            padding-left: 20px;
+            padding-top: 20px;
+        }
         body {
             display: flex;
             flex-direction: column;
@@ -23,7 +37,7 @@
             margin: 10px;
             max-width: 350px;
         }
-        h1 {
+        h1, h2 {
             font-family: Verdana, Geneva, Tahoma, sans-serif;
         }
         fieldset {
@@ -41,11 +55,8 @@
     >
 </head>
 <body>
-    <br><br>
-    <br><br>
     <h1>Aniberg</h1>
     <input type="search" id="usernameInput" placeholder="Enter username" />
-    <br>
     <fieldset>
         <legend>Choose name type:</legend>
         <input type="radio" id="English" name="language" value="English" checked />
@@ -53,14 +64,13 @@
         <input type="radio" id="Romaji" name="language" value="Romaji" />
         <label htmlFor="Romaji">Romaji</label>
       </fieldset>
-    <br>
     <button id="fetchButton" onclick="main()">Generate Iceberg</button>
-    <br>
     <canvas id="canvas" width="800" height="1200"></canvas>
-    <br>
     <button id="downloadBtn">Download Image</button>
-    <br><br>
-    <br><br>
+    <div id="statDiv">
+    <h2 id ="statHeader">Account Stats</h2>
+    <p id="stats"></p>
+    </div>
     <script src="app.js"></script>
 </body>
 </html>
